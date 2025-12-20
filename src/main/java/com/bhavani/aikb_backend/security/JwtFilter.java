@@ -25,7 +25,9 @@ public class JwtFilter implements Filter {
 
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
-            jwtUtil.validateToken(token); // throws exception if invalid
+            String email = jwtUtil.validateToken(token);
+
+            req.setAttribute("email", email);
         }
 
         chain.doFilter(request, response); // continue filter chain

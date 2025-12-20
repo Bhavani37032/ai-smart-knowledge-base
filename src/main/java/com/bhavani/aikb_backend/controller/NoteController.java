@@ -2,6 +2,7 @@ package com.bhavani.aikb_backend.controller;
 
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import com.bhavani.aikb_backend.dto.NoteCreateRequest;
@@ -27,7 +28,8 @@ public class NoteController {
     }
 
     @GetMapping
-    public List<Note> getNotes(@RequestParam Long userId) {
-        return noteService.getNotes(userId);
+    public List<Note> getNotes(HttpServletRequest request) {
+        String email = (String) request.getAttribute("email");
+        return noteService.getNotesForUser(email);
     }
 }

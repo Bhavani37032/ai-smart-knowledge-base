@@ -32,4 +32,11 @@ public class NoteService {
     public List<Note> getNotes(Long userId) {
         return noteRepository.findByUserId(userId);
     }
+
+    public List<Note> getNotesForUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return noteRepository.findByUserId(user.getId());
+    }
 }

@@ -31,4 +31,9 @@ public class JwtUtil {
 
         return claims.getSubject(); // email
     }
+
+    public String extractEmail(String token) {
+        return validateToken(token);
+}
+
 }
