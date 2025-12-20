@@ -1,8 +1,10 @@
 package com.bhavani.aikb_backend.controller;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import com.bhavani.aikb_backend.dto.NoteCreateRequest;
 import com.bhavani.aikb_backend.entity.Note;
 import com.bhavani.aikb_backend.service.NoteService;
 
@@ -16,11 +18,12 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public Note createNote(
-            @RequestParam Long userId,
-            @RequestParam String title,
-            @RequestParam String content) {
-        return noteService.createNote(userId, title, content);
+    public Note createNote(@RequestBody @Valid NoteCreateRequest request) {
+        return noteService.createNote(
+                request.getUserId(),
+                request.getTitle(),
+                request.getContent()
+        );
     }
 
     @GetMapping
