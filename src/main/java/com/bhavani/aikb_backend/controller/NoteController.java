@@ -19,12 +19,12 @@ public class NoteController {
     private final NoteService noteService;
 
     @PostMapping
-    public Note createNote(@RequestBody @Valid NoteCreateRequest request) {
-        return noteService.createNote(
-                request.getUserId(),
-                request.getTitle(),
-                request.getContent()
-        );
+    public Note createNote(
+            @RequestBody @Valid NoteCreateRequest request,
+            HttpServletRequest httpRequest
+    ){
+        String email = (String) httpRequest.getAttribute("email");
+        return noteService.createNote(email, request);
     }
 
     @GetMapping

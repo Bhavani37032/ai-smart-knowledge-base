@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.bhavani.aikb_backend.entity.*;
 import com.bhavani.aikb_backend.repository.*;
+import com.bhavani.aikb_backend.dto.NoteCreateRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,18 +16,23 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final EmbeddingService embeddingService;
 
-    public Note createNote(Long userId, String title, String content) {
-        User user = userRepository.findById(userId)
+    public Note createNote(String email, NoteCreateRequest request) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Note note = new Note();
-        note.setTitle(title);
-        note.setContent(content);
-        note.setCreatedAt(LocalDateTime.now());
+        note.setTitle(request.getTitle());
+        note.setContent(request.getContent());
         note.setUser(user);
+        note.setCreatedAt(LocalDateTime.now());
 
-        return noteRepository.save(note);
+        Note saved = noteRepository.save(note);
+
+        embeddingService.createEmbedding(saved);
+
+        return saved;
     }
 
     public List<Note> getNotes(Long userId) {

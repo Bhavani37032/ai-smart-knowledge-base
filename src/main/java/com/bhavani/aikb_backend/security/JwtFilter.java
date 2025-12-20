@@ -1,35 +1,58 @@
 package com.bhavani.aikb_backend.security;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class JwtFilter implements Filter {
+public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
     @Override
-    public void doFilter(
-            ServletRequest request,
-            ServletResponse response,
-            FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        String auth = req.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring(7);
-            String email = jwtUtil.validateToken(token);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
 
-            req.setAttribute("email", email);
+            try {
+                // Validate token and extract email
+                String email = jwtUtil.validateToken(token);
+
+                // Tell Spring Security that user is authenticated
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                email, null, List.of()
+                        );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+
+                // Also attach email to request (used in controllers)
+                request.setAttribute("email", email);
+
+            } catch (Exception e) {
+                // Invalid token → do NOT authenticate
+                SecurityContextHolder.clearContext();
+            }
         }
 
-        chain.doFilter(request, response); // continue filter chain
+        filterChain.doFilter(request, response);
     }
 }
