@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "note_embedding")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,9 +15,11 @@ public class NoteEmbedding {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(optional = false)
+    @JoinColumn(name = "note_id", nullable = false)
     private Note note;
 
     @Lob
-    private String vector; // stored as JSON string
+    @Column(nullable = false)
+    private String vector;
 }

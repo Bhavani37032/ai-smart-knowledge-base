@@ -10,10 +10,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+
+        String message = "Database constraint violation";
+
+        // Optional: better message for duplicate email
+        if (ex.getMostSpecificCause() != null &&
+            ex.getMostSpecificCause().getMessage() != null &&
+            ex.getMostSpecificCause().getMessage().contains("users.email")) {
+
+            message = "Email already exists";
+        }
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("Email already exists"));
+                .body(new ErrorResponse(message));
     }
 
     @ExceptionHandler(RuntimeException.class)
